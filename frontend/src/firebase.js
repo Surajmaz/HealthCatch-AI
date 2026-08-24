@@ -1,18 +1,25 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Tomar notun Firebase Config
+// Firebase config, read from frontend/.env — see the note in that file about
+// why this isn't a "secret" in the way an API server key is, even though
+// it's still good practice to keep it out of source control.
 const firebaseConfig = {
-  apiKey: "AIzaSyBYKr2WufVkdIp4dctg-4U4PsfNOEU9z9U",
-  authDomain: "healthcatch-ai-f458e.firebaseapp.com",
-  projectId: "healthcatch-ai-f458e",
-  storageBucket: "healthcatch-ai-f458e.firebasestorage.app",
-  messagingSenderId: "491845077988",
-  appId: "1:491845077988:web:1ccd2e00fa5a960cdd15f1",
-  measurementId: "G-1QZFKR3ZZQ"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Firebase chalu kora
+if (!firebaseConfig.apiKey) {
+  console.error(
+    "[HealthCatch] Firebase config is missing — check that frontend/.env has all VITE_FIREBASE_* values set, and that you restarted `npm run dev` after adding them (Vite only reads .env on startup)."
+  );
+}
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();

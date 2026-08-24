@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment variables — contains config values; keep out of version
+# control regardless of whether they're truly "secret" (good hygiene, and
+# means dev/prod projects can use different .env files without diffs).
+.env
+.env.*
+!.env.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
