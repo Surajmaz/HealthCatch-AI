@@ -1075,6 +1075,8 @@ function AuthenticatedApp({ onLogout, _scrollProgressRef, isDarkMode, setIsDarkM
     { id: 2, name: 'Dr. Sneha Roy', time: '2h ago', text: 'Reminder for everyone working desk jobs: 4-7-8 breathing downregulates the sympathetic fight-or-flight nervous system in less than 90 seconds. Try it before your next stressful call.', likes: 64, liked: true, comments: 12, following: true, category: 'Mental Health' }
   ]);
   const [newPostText, setNewPostText] = useState('');
+  const [joinedGroups, setJoinedGroups] = useState({ g2: true, g3: true });
+  const [appliedJobs, setAppliedJobs] = useState({});
 
   // Chatbot State
   const [chatMessages, setChatMessages] = useState([
@@ -1508,10 +1510,10 @@ function AuthenticatedApp({ onLogout, _scrollProgressRef, isDarkMode, setIsDarkM
                         <Sparkles size={16} /> WELLNESS OVERVIEW
                       </div>
                       <h1 style={{ fontSize: 'clamp(26px, 4vw, 38px)', fontWeight: 900, fontFamily: "'Space Grotesk', sans-serif" }}>
-                        Welcome back, <span className="text-gradient-hero">{userName.split(' ')[0]}</span>
+                        {(() => { const h = new Date().getHours(); return h < 12 ? 'Good Morning' : h < 17 ? 'Good Afternoon' : 'Good Evening'; })()}, <span className="text-gradient-hero">{userName.split(' ')[0]}</span> 👋
                       </h1>
                       <p style={{ color: textSecondary, fontSize: 14, marginTop: 4 }}>
-                        Your metabolic and behavioral metrics are trending 14% higher than last week.
+                        {new Date().toLocaleDateString('en-IN', { weekday: 'long', month: 'long', day: 'numeric' })} · Your metrics are trending 14% higher than last week.
                       </p>
                     </div>
 
@@ -1527,6 +1529,31 @@ function AuthenticatedApp({ onLogout, _scrollProgressRef, isDarkMode, setIsDarkM
                         <p style={{ fontSize: 17, fontWeight: 900, color: textPrimary }}>Optimal Range</p>
                       </div>
                     </div>
+                  </div>
+
+                  {/* Quick Actions Row */}
+                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 24 }}>
+                    {[
+                      { label: '💬 AI Chat', tab: 'chat', color: '#3b82f6' },
+                      { label: '👨‍⚕️ Book Doctor', tab: 'doctors', color: '#10b981' },
+                      { label: '📁 Medical Vault', tab: 'vault', color: '#a855f7' },
+                      { label: '🏃 Challenges', tab: 'challenges', color: '#f59e0b' },
+                      { label: '🛒 Market', tab: 'market', color: '#ef4444' },
+                    ].map(a => (
+                      <motion.button
+                        key={a.tab}
+                        onClick={() => handleNav(a.tab)}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.96 }}
+                        style={{
+                          padding: '9px 18px', borderRadius: 99, border: `1px solid ${a.color}33`,
+                          background: `${a.color}18`, color: a.color, fontSize: 13, fontWeight: 700,
+                          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
+                        }}
+                      >
+                        {a.label}
+                      </motion.button>
+                    ))}
                   </div>
 
                   {/* Quick Vitals Row */}
@@ -1615,6 +1642,28 @@ function AuthenticatedApp({ onLogout, _scrollProgressRef, isDarkMode, setIsDarkM
                     </GlassCard>
                   </div>
 
+                  {/* Upcoming Appointments Banner */}
+                  {bookedAppointments.length > 0 && (
+                    <GlassCard style={{ marginBottom: 20, background: 'linear-gradient(135deg, rgba(16,185,129,0.08), rgba(59,130,246,0.06))', borderColor: 'rgba(16,185,129,0.2)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                        <Calendar size={18} color="#10b981" />
+                        <h3 style={{ fontSize: 16, fontWeight: 800 }}>Upcoming Appointments</h3>
+                        <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 99, background: 'rgba(16,185,129,0.15)', color: '#34d399', fontWeight: 800 }}>{bookedAppointments.length}</span>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        {bookedAppointments.slice(0, 3).map((apt, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', borderRadius: 12, background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', border: `1px solid ${panelBorder}` }}>
+                            <div>
+                              <p style={{ fontSize: 13.5, fontWeight: 700 }}>{apt.doctorName}</p>
+                              <p style={{ fontSize: 11, color: textSecondary }}>{apt.date} at {apt.slot} · {apt.type === 'video' ? '📹 Video' : '🏥 In-Clinic'}</p>
+                            </div>
+                            <span style={{ fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 99, background: 'rgba(16,185,129,0.12)', color: '#34d399' }}>Confirmed</span>
+                          </div>
+                        ))}
+                      </div>
+                    </GlassCard>
+                  )}
+
                   {/* Medication Reminders & Quick Actions */}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(280px, 0.8fr)', gap: 20 }}>
                     {/* Medication Schedule */}
@@ -1688,6 +1737,41 @@ function AuthenticatedApp({ onLogout, _scrollProgressRef, isDarkMode, setIsDarkM
                       </div>
                     </GlassCard>
                   </div>
+                  {/* Weekly Wellness Trend */}
+                  <GlassCard style={{ marginTop: 20 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                      <h3 style={{ fontSize: 16, fontWeight: 800 }}>Weekly Wellness Trend</h3>
+                      <span style={{ fontSize: 11, color: textSecondary, fontWeight: 600 }}>Last 7 days</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 10, height: 100, padding: '0 4px' }}>
+                      {[
+                        { day: 'Mon', steps: 65, water: 70, mood: 80 },
+                        { day: 'Tue', steps: 80, water: 85, mood: 70 },
+                        { day: 'Wed', steps: 72, water: 60, mood: 90 },
+                        { day: 'Thu', steps: 90, water: 75, mood: 85 },
+                        { day: 'Fri', steps: 55, water: 80, mood: 65 },
+                        { day: 'Sat', steps: 95, water: 90, mood: 95 },
+                        { day: 'Sun', steps: 74, water: 72, mood: 88 },
+                      ].map((d, i) => (
+                        <div key={d.day} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+                          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{ height: `${d.steps}%` }}
+                              transition={{ delay: i * 0.08, duration: 0.6, ease: 'easeOut' }}
+                              style={{ width: '100%', maxWidth: 28, background: 'linear-gradient(180deg, #3b82f6, #60a5fa)', borderRadius: '4px 4px 0 0', minHeight: 4 }}
+                            />
+                          </div>
+                          <span style={{ fontSize: 10, color: textSecondary, fontWeight: 700, marginTop: 4 }}>{d.day}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ display: 'flex', gap: 16, marginTop: 10 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: textSecondary }}>
+                        <span style={{ width: 10, height: 10, borderRadius: 2, background: 'linear-gradient(135deg,#3b82f6,#60a5fa)', display: 'inline-block' }} /> Steps Activity
+                      </span>
+                    </div>
+                  </GlassCard>
                 </div>
               </motion.div>
             )}
@@ -2525,6 +2609,11 @@ function AuthenticatedApp({ onLogout, _scrollProgressRef, isDarkMode, setIsDarkM
                   <div style={{ marginBottom: 20 }}>
                     <h2 style={{ fontSize: 28, fontWeight: 900, fontFamily: "'Space Grotesk', sans-serif" }}>Health Circle Feed</h2>
                     <p style={{ color: textSecondary, fontSize: 13, marginTop: 2 }}>Real stories, recovery journeys, and verified clinical tips.</p>
+                    <div style={{ display: 'flex', gap: 8, marginTop: 14 }}>
+                      {['For You', 'Following', 'Trending', 'Clinical Tips'].map(tab => (
+                        <button key={tab} onClick={() => toast(`Switched to ${tab} feed`)} style={{ padding: '7px 16px', borderRadius: 99, border: `1px solid ${panelBorder}`, background: tab === 'For You' ? 'linear-gradient(135deg,#3b82f6,#10b981)' : 'transparent', color: tab === 'For You' ? '#fff' : textSecondary, fontSize: 12.5, fontWeight: 700, cursor: 'pointer' }}>{tab}</button>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Post Composer */}
@@ -2681,41 +2770,231 @@ function AuthenticatedApp({ onLogout, _scrollProgressRef, isDarkMode, setIsDarkM
               </motion.div>
             )}
 
-            {/* Other Fallback Views (Groups, Jobs, Donors, Messaging) */}
-            {['groups', 'jobs', 'donors', 'messaging'].includes(activeTab) && (
-              <motion.div
-                key={activeTab}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -14 }}
-                className="hc-scroll-panel"
-                style={{ height: '100%', overflowY: 'auto', padding: '32px 36px 120px' }}
-              >
+            {/* HEALTH GROUPS */}
+            {activeTab === 'groups' && (
+              <motion.div key="groups" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} className="hc-scroll-panel" style={{ height: '100%', overflowY: 'auto', padding: '32px 36px 120px' }}>
                 <div style={{ maxWidth: 1080, margin: '0 auto' }}>
-                  <h2 style={{ fontSize: 30, fontWeight: 900, textTransform: 'capitalize', marginBottom: 8 }}>
-                    {activeTab === 'groups' ? 'Action Communities' : activeTab === 'jobs' ? 'Healthcare Careers' : activeTab === 'donors' ? 'Emergency Blood Donors' : 'Direct Messages'}
-                  </h2>
-                  <p style={{ color: textSecondary, fontSize: 14, marginBottom: 24 }}>
-                    Connected to your HealthCatch ecosystem.
-                  </p>
+                  <div style={{ marginBottom: 26 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#60a5fa', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}><UsersRound size={16} /> ACTION COMMUNITIES</div>
+                    <h2 style={{ fontSize: 32, fontWeight: 900, fontFamily: "'Space Grotesk', sans-serif" }}>Health Groups</h2>
+                    <p style={{ color: textSecondary, fontSize: 14, marginTop: 4 }}>Join communities that match your health goals and get collective motivation.</p>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 18 }}>
+                    {[
+                      { id: 'g1', name: 'Diabetes Warriors', emoji: '🩸', members: 2847, joined: false, desc: 'Managing type 1 & 2 diabetes through diet, exercise, and community support. Monitored by endocrinologists.', challenge: '30-Day Low Glycemic Diet', category: 'Chronic Care' },
+                      { id: 'g2', name: 'Morning Yoga Circle', emoji: '🧘', members: 5612, joined: true, desc: 'Daily 20-minute guided yoga sessions for flexibility, calm, and mindful breathing. All levels welcome.', challenge: 'Sunrise Flow 7-Day Streak', category: 'Fitness' },
+                      { id: 'g3', name: 'Mental Wellness Tribe', emoji: '🧠', members: 3920, joined: true, desc: 'Safe space for discussing anxiety, depression, and burnout recovery. Facilitated by licensed psychologists.', challenge: 'Gratitude Journal 14 Days', category: 'Mental Health' },
+                      { id: 'g4', name: 'Heart Health Heroes', emoji: '❤️', members: 1234, joined: false, desc: 'Cardio recovery, hypertension management, and cardiac rehab support group for survivors and caregivers.', challenge: 'Walk 5K Daily for 30 Days', category: 'Cardiac Care' },
+                      { id: 'g5', name: 'Nutrition Nerds', emoji: '🥗', members: 4441, joined: false, desc: 'Science-backed nutritional guidance, meal prep ideas, and macro tracking with registered dietitians.', challenge: 'Sugar-Free October', category: 'Nutrition' },
+                      { id: 'g6', name: 'Sleep Optimization Lab', emoji: '🌙', members: 2088, joined: false, desc: 'Fix insomnia, improve sleep quality, and master chronobiology with sleep science experts.', challenge: '10-Day Sleep Hygiene Reset', category: 'Sleep Health' },
+                    ].map(g => {
+                      const gJoined = joinedGroups[g.id] ?? g.joined;
+                      return (
+                        <GlassCard key={g.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(59,130,246,0.1)', fontSize: 24, display: 'grid', placeItems: 'center' }}>{g.emoji}</div>
+                              <div>
+                                <h4 style={{ fontSize: 15, fontWeight: 800 }}>{g.name}</h4>
+                                <span style={{ fontSize: 11, color: '#60a5fa', fontWeight: 700, background: 'rgba(59,130,246,0.1)', padding: '2px 8px', borderRadius: 99 }}>{g.category}</span>
+                              </div>
+                            </div>
+                            <motion.button
+                              whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                              onClick={() => { setJoinedGroups(prev => ({ ...prev, [g.id]: !(prev[g.id] ?? g.joined) })); toast(gJoined ? `Left ${g.name}` : `Joined ${g.name}! 🎉`); }}
+                              style={{ padding: '7px 14px', borderRadius: 10, border: gJoined ? '1px solid rgba(239,68,68,0.3)' : 'none', background: gJoined ? 'rgba(239,68,68,0.08)' : 'linear-gradient(135deg,#3b82f6,#10b981)', color: gJoined ? '#f87171' : '#fff', fontSize: 12, fontWeight: 700, cursor: 'pointer', flexShrink: 0 }}
+                            >{gJoined ? 'Leave' : 'Join'}</motion.button>
+                          </div>
+                          <p style={{ fontSize: 13, color: textSecondary, lineHeight: 1.55, marginBottom: 14, flex: 1 }}>{g.desc}</p>
+                          <div style={{ padding: '10px 12px', borderRadius: 12, background: isDarkMode ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)', border: `1px solid ${panelBorder}` }}>
+                            <p style={{ fontSize: 11, fontWeight: 800, color: '#f59e0b', marginBottom: 2 }}>🏆 Active Challenge</p>
+                            <p style={{ fontSize: 12, fontWeight: 700 }}>{g.challenge}</p>
+                          </div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12 }}>
+                            <span style={{ fontSize: 11, color: textSecondary }}>{g.members.toLocaleString()} members</span>
+                            {gJoined && <span style={{ fontSize: 11, fontWeight: 800, color: '#34d399' }}>✓ Member</span>}
+                          </div>
+                        </GlassCard>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
+            {/* HEALTHCARE JOBS */}
+            {activeTab === 'jobs' && (
+              <motion.div key="jobs" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} className="hc-scroll-panel" style={{ height: '100%', overflowY: 'auto', padding: '32px 36px 120px' }}>
+                <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+                  <div style={{ marginBottom: 26 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#60a5fa', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}><BriefcaseBusiness size={16} /> HEALTHCARE CAREERS</div>
+                    <h2 style={{ fontSize: 32, fontWeight: 900, fontFamily: "'Space Grotesk', sans-serif" }}>Healthcare Jobs Board</h2>
+                    <p style={{ color: textSecondary, fontSize: 14, marginTop: 4 }}>Curated clinical and healthcare technology roles from verified Indian healthcare employers.</p>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                    {[
+                      { id: 'j1', title: 'Senior Clinical Psychologist', org: 'Apollo Mental Health Institute', location: 'Kolkata, WB', type: 'Full-Time', salary: '₹12–18 LPA', skills: ['CBT', 'DBT', 'Psychological Assessment'], urgent: true, posted: '2 days ago' },
+                      { id: 'j2', title: 'Cardiologist – Interventional', org: 'Fortis Heart Institute', location: 'Delhi NCR', type: 'Full-Time', salary: '₹35–55 LPA', skills: ['PTCA', 'Echocardiography', 'Cath Lab'], urgent: false, posted: '5 days ago' },
+                      { id: 'j3', title: 'Health Data Scientist', org: 'HealthTech AI Pvt Ltd', location: 'Remote / Bengaluru', type: 'Remote', salary: '₹18–28 LPA', skills: ['Python', 'ML', 'FHIR', 'Healthcare Analytics'], urgent: false, posted: '1 week ago' },
+                      { id: 'j4', title: 'Registered Dietitian & Nutritionist', org: 'Max Super Specialty Hospital', location: 'Mumbai, MH', type: 'Part-Time', salary: '₹6–10 LPA', skills: ['Clinical Nutrition', 'Renal Diet', 'Oncology Nutrition'], urgent: true, posted: '3 days ago' },
+                      { id: 'j5', title: 'Telemedicine Platform Engineer', org: 'HealthCatch AI (Us!)', location: 'Fully Remote', type: 'Remote', salary: '₹20–32 LPA', skills: ['React', 'FastAPI', 'WebRTC', 'HIPAA Security'], urgent: false, posted: 'Just now' },
+                    ].map(job => {
+                      const applied = appliedJobs[job.id];
+                      return (
+                        <GlassCard key={job.id}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+                            <div style={{ flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                                <h4 style={{ fontSize: 16, fontWeight: 800 }}>{job.title}</h4>
+                                {job.urgent && <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 99, background: 'rgba(239,68,68,0.15)', color: '#f87171' }}>URGENT HIRE</span>}
+                              </div>
+                              <p style={{ fontSize: 13, fontWeight: 700, color: '#60a5fa' }}>{job.org}</p>
+                              <div style={{ display: 'flex', gap: 16, marginTop: 6, flexWrap: 'wrap' }}>
+                                <span style={{ fontSize: 12, color: textSecondary }}>📍 {job.location}</span>
+                                <span style={{ fontSize: 12, color: textSecondary }}>⏰ {job.type}</span>
+                                <span style={{ fontSize: 12, fontWeight: 700, color: '#34d399' }}>{job.salary}</span>
+                                <span style={{ fontSize: 12, color: textSecondary }}>Posted {job.posted}</span>
+                              </div>
+                              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 10 }}>
+                                {job.skills.map(s => (
+                                  <span key={s} style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 99, background: 'rgba(59,130,246,0.1)', color: '#93c5fd' }}>{s}</span>
+                                ))}
+                              </div>
+                            </div>
+                            <motion.button
+                              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.95 }}
+                              onClick={() => { if (!applied) { setAppliedJobs(prev => ({ ...prev, [job.id]: true })); toast(`Applied to ${job.title} at ${job.org}! 🎯`); } }}
+                              style={{ padding: '10px 22px', borderRadius: 12, border: applied ? `1px solid ${panelBorder}` : 'none', background: applied ? 'transparent' : 'linear-gradient(135deg,#3b82f6,#10b981)', color: applied ? textSecondary : '#fff', fontWeight: 800, fontSize: 13, cursor: applied ? 'default' : 'pointer', flexShrink: 0 }}
+                            >{applied ? '✓ Applied' : 'Apply Now'}</motion.button>
+                          </div>
+                        </GlassCard>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* EMERGENCY DONORS */}
+            {activeTab === 'donors' && (
+              <motion.div key="donors" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} className="hc-scroll-panel" style={{ height: '100%', overflowY: 'auto', padding: '32px 36px 120px' }}>
+                <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+                  <div style={{ marginBottom: 26 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#f87171', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}><HeartHandshake size={16} /> EMERGENCY BLOOD NETWORK</div>
+                    <h2 style={{ fontSize: 32, fontWeight: 900, fontFamily: "'Space Grotesk', sans-serif" }}>Emergency Donor Network</h2>
+                    <p style={{ color: textSecondary, fontSize: 14, marginTop: 4 }}>Find verified blood donors and plasma donors near you in real-time medical emergencies.</p>
+                  </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
-                    {[1, 2, 3].map(n => (
-                      <GlassCard key={n}>
-                        <h4 style={{ fontSize: 16, fontWeight: 800, marginBottom: 6 }}>
-                          {activeTab === 'groups' ? `Health Community #${n}` : activeTab === 'jobs' ? `Clinical Role #${n}` : activeTab === 'donors' ? `O+ Donor Match #${n}` : `Conversation #${n}`}
-                        </h4>
-                        <p style={{ fontSize: 13, color: textSecondary, marginBottom: 14 }}>
-                          Fully integrated real-time interactive module with encrypted data transport.
-                        </p>
-                        <button
-                          onClick={() => toast(`Interacting with ${activeTab} item #${n}`)}
-                          style={{ padding: '8px 14px', borderRadius: 10, border: 'none', background: 'rgba(59,130,246,0.12)', color: '#60a5fa', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}
-                        >
-                          Interact
-                        </button>
+                    {[
+                      { name: 'Rohit Sharma', blood: 'O+', city: 'Kolkata, WB', lastDonated: 'Aug 2026', available: true, donations: 12 },
+                      { name: 'Priya Ghosh', blood: 'A-', city: 'Salt Lake, Kolkata', lastDonated: 'Sep 2026', available: true, donations: 7 },
+                      { name: 'Amit Das', blood: 'B+', city: 'Howrah, WB', lastDonated: 'Jul 2026', available: false, donations: 4 },
+                      { name: 'Sunita Mehra', blood: 'AB+', city: 'Dum Dum, Kolkata', lastDonated: 'Oct 2026', available: true, donations: 20 },
+                      { name: 'Kiran Verma', blood: 'O-', city: 'Barasat, WB', lastDonated: 'Nov 2026', available: true, donations: 15 },
+                      { name: 'Debapriya Sen', blood: 'A+', city: 'Jadavpur, Kolkata', lastDonated: 'Sep 2026', available: false, donations: 9 },
+                    ].map((d, i) => (
+                      <GlassCard key={i}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                            <UserAvatar name={d.name} size={46} />
+                            <div>
+                              <h4 style={{ fontSize: 14, fontWeight: 800 }}>{d.name}</h4>
+                              <p style={{ fontSize: 11, color: textSecondary, marginTop: 2 }}>📍 {d.city}</p>
+                            </div>
+                          </div>
+                          <div style={{ textAlign: 'center', width: 44, height: 44, borderRadius: 12, background: 'rgba(239,68,68,0.12)', display: 'grid', placeItems: 'center' }}>
+                            <span style={{ fontSize: 16, fontWeight: 900, color: '#f87171' }}>{d.blood}</span>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 12, fontSize: 12, color: textSecondary, marginBottom: 12 }}>
+                          <span>🩸 {d.donations} donations</span>
+                          <span>Last: {d.lastDonated}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'space-between' }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, padding: '4px 10px', borderRadius: 99, background: d.available ? 'rgba(16,185,129,0.12)' : 'rgba(100,116,139,0.1)', color: d.available ? '#34d399' : textSecondary }}>
+                            {d.available ? '✓ Available Now' : 'Unavailable'}
+                          </span>
+                          <button
+                            onClick={() => toast(d.available ? `Emergency contact initiated for ${d.name} 🚨` : 'Donor currently unavailable')}
+                            style={{ padding: '7px 14px', borderRadius: 10, border: 'none', background: d.available ? 'rgba(239,68,68,0.15)' : 'rgba(100,116,139,0.1)', color: d.available ? '#f87171' : textSecondary, fontSize: 12, fontWeight: 700, cursor: d.available ? 'pointer' : 'default' }}
+                          >{d.available ? '🚨 Contact' : 'Offline'}</button>
+                        </div>
                       </GlassCard>
                     ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* DIRECT MESSAGES */}
+            {activeTab === 'messaging' && (
+              <motion.div key="messaging" initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -14 }} className="hc-scroll-panel" style={{ height: '100%', overflowY: 'auto', padding: '32px 36px 120px' }}>
+                <div style={{ maxWidth: 900, margin: '0 auto' }}>
+                  <div style={{ marginBottom: 26 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#60a5fa', fontSize: 11, fontWeight: 800, letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 8 }}><MessageSquareText size={16} /> DIRECT MESSAGES</div>
+                    <h2 style={{ fontSize: 32, fontWeight: 900, fontFamily: "'Space Grotesk', sans-serif" }}>Health Conversations</h2>
+                    <p style={{ color: textSecondary, fontSize: 14, marginTop: 4 }}>Encrypted peer-to-peer health conversations with doctors and community members.</p>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 0.4fr) minmax(0, 1fr)', gap: 16, minHeight: 480 }}>
+                    {/* Contact List */}
+                    <GlassCard style={{ padding: 0, overflow: 'hidden' }}>
+                      <div style={{ padding: '16px 16px 12px', borderBottom: `1px solid ${panelBorder}` }}>
+                        <input type="text" placeholder="Search conversations..." style={{ width: '100%', height: 38, borderRadius: 10, border: `1px solid ${panelBorder}`, background: isDarkMode ? 'rgba(0,0,0,0.3)' : '#f1f5f9', color: textPrimary, padding: '0 12px', outline: 'none', fontSize: 13 }} />
+                      </div>
+                      {[
+                        { name: 'Dr. Amit Patel', last: 'Your BP readings look great!', time: '2m', unread: 2, online: true },
+                        { name: 'Dr. Sneha Roy', last: 'Remember your meditation tonight', time: '1h', unread: 0, online: true },
+                        { name: 'Ankita Halder', last: 'Congrats on the 10K streak! 🎉', time: '3h', unread: 1, online: false },
+                        { name: 'Wellness Coach AI', last: 'Your weekly report is ready', time: '1d', unread: 0, online: true },
+                      ].map((c, i) => (
+                        <div
+                          key={i}
+                          onClick={() => toast(`Opening chat with ${c.name}`)}
+                          style={{ display: 'flex', gap: 10, padding: '12px 16px', cursor: 'pointer', borderBottom: `1px solid ${panelBorder}`, background: i === 0 ? (isDarkMode ? 'rgba(59,130,246,0.1)' : 'rgba(59,130,246,0.06)') : 'transparent' }}
+                        >
+                          <div style={{ position: 'relative', flexShrink: 0 }}>
+                            <UserAvatar name={c.name} size={42} />
+                            {c.online && <div style={{ position: 'absolute', bottom: 1, right: 1, width: 10, height: 10, borderRadius: '50%', background: '#10b981', border: `2px solid ${isDarkMode ? '#0f172a' : '#fff'}` }} />}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                              <span style={{ fontSize: 13, fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</span>
+                              <span style={{ fontSize: 10, color: textSecondary, flexShrink: 0 }}>{c.time}</span>
+                            </div>
+                            <p style={{ fontSize: 11.5, color: textSecondary, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 2 }}>{c.last}</p>
+                          </div>
+                          {c.unread > 0 && <div style={{ width: 18, height: 18, borderRadius: '50%', background: '#3b82f6', color: '#fff', fontSize: 10, fontWeight: 800, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{c.unread}</div>}
+                        </div>
+                      ))}
+                    </GlassCard>
+
+                    {/* Chat Window */}
+                    <GlassCard style={{ display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden' }}>
+                      <div style={{ padding: '14px 20px', borderBottom: `1px solid ${panelBorder}`, display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <UserAvatar name="Dr. Amit Patel" size={38} />
+                        <div>
+                          <p style={{ fontSize: 14, fontWeight: 800 }}>Dr. Amit Patel</p>
+                          <p style={{ fontSize: 11, color: '#10b981', fontWeight: 700 }}>● Online · Cardiologist</p>
+                        </div>
+                      </div>
+                      <div style={{ flex: 1, padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12, overflowY: 'auto' }}>
+                        {[
+                          { from: 'them', text: "Good morning! I reviewed your latest heart rate data from HealthCatch. Your resting HR is excellent at 62 bpm. Keep up the cardio routine! 💪" },
+                          { from: 'me', text: "Thank you doctor! Should I continue the morning walks or add some HIIT?" },
+                          { from: 'them', text: "Your BP readings look great! 118/76 is optimal. I'd recommend adding 2 days of moderate HIIT per week. Start with 20-minute sessions. ✅" },
+                        ].map((msg, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: msg.from === 'me' ? 'flex-end' : 'flex-start' }}>
+                            <div style={{ maxWidth: '72%', padding: '10px 14px', borderRadius: msg.from === 'me' ? '18px 18px 4px 18px' : '18px 18px 18px 4px', background: msg.from === 'me' ? 'linear-gradient(135deg,#3b82f6,#10b981)' : (isDarkMode ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)'), color: msg.from === 'me' ? '#fff' : textPrimary, fontSize: 13.5, lineHeight: 1.5 }}>
+                              {msg.text}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div style={{ padding: '12px 16px', borderTop: `1px solid ${panelBorder}`, display: 'flex', gap: 10 }}>
+                        <input type="text" placeholder="Type a secure message..." onKeyDown={(e) => { if (e.key === 'Enter') toast('Message sent (encrypted)'); }} style={{ flex: 1, height: 42, borderRadius: 12, border: `1px solid ${panelBorder}`, background: isDarkMode ? 'rgba(0,0,0,0.3)' : '#f8fafc', color: textPrimary, padding: '0 14px', outline: 'none', fontSize: 13 }} />
+                        <button onClick={() => toast('Message sent (encrypted) 🔒')} style={{ padding: '0 18px', height: 42, borderRadius: 12, border: 'none', background: 'linear-gradient(135deg,#3b82f6,#10b981)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, fontSize: 13 }}><Send size={15} /> Send</button>
+                      </div>
+                    </GlassCard>
                   </div>
                 </div>
               </motion.div>
