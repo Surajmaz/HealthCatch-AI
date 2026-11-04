@@ -1,9 +1,6 @@
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
-// Firebase config, read from frontend/.env — see the note in that file about
-// why this isn't a "secret" in the way an API server key is, even though
-// it's still good practice to keep it out of source control.
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -14,14 +11,22 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-if (!firebaseConfig.apiKey) {
-  console.error(
-    "[HealthCatch] Firebase config is missing — check that frontend/.env has all VITE_FIREBASE_* values set, and that you restarted `npm run dev` after adding them (Vite only reads .env on startup)."
-  );
+let app = null;
+let auth = null;
+let provider = null;
+
+try {
+  if (firebaseConfig.apiKey) {
+    app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+    auth = getAuth(app);
+    provider = new GoogleAuthProvider();
+  } else {
+    console.warn(
+      "[HealthCatch] Firebase API Key is not set in frontend/.env. App will support Guest/Demo mode."
+    );
+  }
+} catch (error) {
+  console.warn("[HealthCatch] Firebase initialization caught error:", error);
 }
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
-
-export { auth, provider };
+export { auth, provider, app };

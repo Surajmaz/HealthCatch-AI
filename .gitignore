@@ -1,1 +1,25 @@
-node_modules
+# Environment variables & secrets
+.env
+*.env
+*.env.local
+backend/.env
+frontend/.env
+!.env.example
+!frontend/.env.example
+
+# Node dependencies & builds
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+
+# Python Virtual Environments & caches
+venv/
+.venv/
+backend/venv/
+__pycache__/
+*.pyc
+
+# System & IDE files
+.DS_Store
+.vscode/
