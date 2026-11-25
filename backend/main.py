@@ -376,7 +376,7 @@ async def chat_with_agent(
         parts = [{"text": clean_message if clean_message else "Please review and explain the attached medical file."}]
 
         # Process attached image or document if provided (Max 10MB limit)
-        if file and file.filename:
+        if file and hasattr(file, "filename") and file.filename:
             # Validate MIME type
             allowed_mimes = ["image/jpeg", "image/png", "image/webp", "image/gif", "application/pdf"]
             mime_type = file.content_type or "image/jpeg"
@@ -402,10 +402,13 @@ async def chat_with_agent(
 
         # Try current production models in order of capability
         MODELS_TO_TRY = [
+            "gemini-3.5-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
+            "gemini-3.8-flash",
+            "gemini-flash-latest",
             "gemini-2.5-flash",
-            "gemini-2.0-flash",
-            "gemini-1.5-flash",
-            "gemini-1.5-pro"
+            "gemini-2.5-pro",
         ]
 
         headers = {"Content-Type": "application/json"}
