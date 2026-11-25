@@ -4,7 +4,7 @@ import {
   sendEmailVerification, updateProfile, signOut, onAuthStateChanged
 } from 'firebase/auth';
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard, MessageSquare, Send, User, Bot, Loader2,
   LogOut, Search, Sun, Moon, Paperclip, Mail, Lock, Menu, X, AlertCircle,
@@ -399,8 +399,8 @@ function InputField({ icon, style, isDark = true, ...props }) {
     </div>
   );
 }
-// ── Cinematic Landing Page ──────────────────────────────────────────────
-function CinematicLanding({ onLogin, onGuestLogin, scrollProgressRef, isDarkMode, setIsDarkMode }) {
+// ── Clean Flowing Landing Page (Zero Collapsing / Butter-Smooth Scroll) ──
+function CinematicLanding({ onLogin, onGuestLogin, _scrollProgressRef, isDarkMode, setIsDarkMode }) {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [fullName, setFullName] = useState('');
   const [dob, setDob] = useState('');
@@ -412,29 +412,16 @@ function CinematicLanding({ onLogin, onGuestLogin, scrollProgressRef, isDarkMode
   const [successMsg, setSuccessMsg] = useState('');
   const [isAuthLoading, setIsAuthLoading] = useState(false);
 
-  const { scrollYProgress } = useScroll();
-  useMotionValueEvent(scrollYProgress, "change", (v) => {
-    if (scrollProgressRef) scrollProgressRef.current = v;
-  });
-
-  const s1Opacity = useTransform(scrollYProgress, [0, 0.18, 0.25], [1, 1, 0]);
-  const s1Y = useTransform(scrollYProgress, [0, 0.25], [0, -80]);
-
-  const s2Opacity = useTransform(scrollYProgress, [0.22, 0.35, 0.5, 0.6], [0, 1, 1, 0]);
-  const s2Y = useTransform(scrollYProgress, [0.22, 0.35], [60, 0]);
-
-  const s3Opacity = useTransform(scrollYProgress, [0.55, 0.68, 0.8, 0.88], [0, 1, 1, 0]);
-  const s3Y = useTransform(scrollYProgress, [0.55, 0.68], [60, 0]);
-
-  const s4Opacity = useTransform(scrollYProgress, [0.82, 1], [0, 1]);
-  const s4Y = useTransform(scrollYProgress, [0.82, 1], [60, 0]);
-
   const textPrimary = isDarkMode ? '#ffffff' : '#0f172a';
-  const textSecondary = isDarkMode ? 'rgba(255,255,255,0.68)' : '#475569';
-  const textMuted = isDarkMode ? 'rgba(255,255,255,0.45)' : '#64748b';
+  const textSecondary = isDarkMode ? 'rgba(255,255,255,0.72)' : '#475569';
+  const textMuted = isDarkMode ? 'rgba(255,255,255,0.48)' : '#64748b';
   const cardBg = isDarkMode ? 'rgba(11, 20, 44, 0.88)' : 'rgba(255, 255, 255, 0.94)';
   const cardBorder = isDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(15,23,42,0.1)';
   const cardShadow = isDarkMode ? '0 25px 60px -15px rgba(0,0,0,0.8), 0 0 40px rgba(59,130,246,0.15)' : '0 25px 60px -15px rgba(15,23,42,0.12), 0 0 40px rgba(59,130,246,0.06)';
+
+  const scrollToAuth = () => {
+    document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   const handleGoogleLogin = async () => {
     try {
@@ -500,16 +487,16 @@ function CinematicLanding({ onLogin, onGuestLogin, scrollProgressRef, isDarkMode
   };
 
   return (
-    <div style={{ position: 'relative', zIndex: 1, minHeight: '440vh' }}>
-      {/* ── Floating Landing Navbar (Theme Toggle + Quick Demo) ── */}
-      <nav style={{
-        position: 'fixed', top: 16, left: '50%', transform: 'translateX(-50%)',
-        width: 'calc(100% - 32px)', maxWidth: '1080px', height: 56,
-        background: isDarkMode ? 'rgba(11, 20, 42, 0.85)' : 'rgba(255, 255, 255, 0.9)',
+    <div style={{ position: 'relative', zIndex: 1, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      {/* ── Top Floating Navigation Header ── */}
+      <header style={{
+        position: 'sticky', top: 16, zIndex: 100,
+        margin: '0 auto', width: 'calc(100% - 32px)', maxWidth: '1080px', height: 56,
+        background: isDarkMode ? 'rgba(11, 20, 42, 0.88)' : 'rgba(255, 255, 255, 0.92)',
         backdropFilter: 'blur(28px) saturate(180%)',
         border: `1px solid ${cardBorder}`, borderRadius: 999,
         padding: '0 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        zIndex: 100, boxShadow: isDarkMode ? '0 10px 30px rgba(0,0,0,0.5)' : '0 10px 30px rgba(15,23,42,0.06)'
+        boxShadow: isDarkMode ? '0 10px 30px rgba(0,0,0,0.5)' : '0 10px 30px rgba(15,23,42,0.06)'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ width: 34, height: 34, borderRadius: 10, background: 'linear-gradient(135deg, #3b82f6, #10b981)', display: 'grid', placeItems: 'center', boxShadow: '0 0 16px rgba(59,130,246,0.4)' }}>
@@ -528,7 +515,7 @@ function CinematicLanding({ onLogin, onGuestLogin, scrollProgressRef, isDarkMode
             color: '#10b981', fontSize: 11, fontWeight: 800
           }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#10b981', animation: 'pulseDot 1.5s infinite' }} />
-            <span>Gemini 3.5 AI Ready</span>
+            <span>Gemini 3.5 AI Online</span>
           </div>
 
           {/* Theme Toggle Button */}
@@ -545,6 +532,18 @@ function CinematicLanding({ onLogin, onGuestLogin, scrollProgressRef, isDarkMode
             {isDarkMode ? <Sun size={17} /> : <Moon size={17} />}
           </button>
 
+          {/* Sign In anchor */}
+          <button
+            onClick={scrollToAuth}
+            style={{
+              padding: '7px 14px', borderRadius: 99, border: `1px solid ${cardBorder}`,
+              background: 'transparent', color: textPrimary,
+              fontSize: 12.5, fontWeight: 700, cursor: 'pointer'
+            }}
+          >
+            Sign In
+          </button>
+
           {/* Quick Demo Button */}
           <button
             onClick={onGuestLogin}
@@ -558,75 +557,146 @@ function CinematicLanding({ onLogin, onGuestLogin, scrollProgressRef, isDarkMode
             <Sparkles size={14} /> Launch Demo
           </button>
         </div>
-      </nav>
+      </header>
 
-      {/* SECTION 1: HERO */}
-      <motion.div style={{ opacity: s1Opacity, y: s1Y, position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 24px', pointerEvents: 'none' }}>
+      {/* ── SECTION 1: HERO (Dedicated Viewport) ── */}
+      <section style={{
+        minHeight: '84vh', display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', textAlign: 'center', padding: '40px 24px 60px'
+      }}>
         <div style={{ maxWidth: '860px' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 18px', borderRadius: 999, background: isDarkMode ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', marginBottom: 28 }}>
-            <BrainCircuit size={17} color="#60a5fa" />
-            <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#60a5fa' }}>HEALTHCATCH AI 2.0</span>
-          </div>
-          <h1 style={{ fontSize: 'clamp(36px, 7vw, 84px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.04em', marginBottom: '24px', fontFamily: "'Space Grotesk', sans-serif" }}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 10, padding: '8px 20px', borderRadius: 999, background: isDarkMode ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.25)', marginBottom: 28 }}
+          >
+            <BrainCircuit size={17} color="#3b82f6" />
+            <span style={{ fontSize: '13px', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3b82f6' }}>HEALTHCATCH AI 2.0</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            style={{ fontSize: 'clamp(36px, 7vw, 84px)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.04em', marginBottom: '24px', fontFamily: "'Space Grotesk', sans-serif" }}
+          >
             <span style={{ color: textPrimary }}>Your Health.</span><br />
             <span className="text-gradient-hero">Decoded by AI.</span>
-          </h1>
-          <p style={{ fontSize: 'clamp(15px, 2vw, 20px)', color: textSecondary, maxWidth: '580px', margin: '0 auto 36px', lineHeight: 1.65 }}>
-            The empathetic clinical companion combining real-time behavioral insights, smart challenges, and multimodal AI medical guidance.
-          </p>
-        </div>
-        <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 2.2, ease: 'easeInOut' }} style={{ position: 'absolute', bottom: 44, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: textMuted }}>
-          <span style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 800 }}>Scroll down or tap to explore</span>
-          <ChevronDown size={18} />
-        </motion.div>
-      </motion.div>
+          </motion.h1>
 
-      {/* SECTION 2: VALUES & CAPABILITIES */}
-      <motion.div style={{ opacity: s2Opacity, y: s2Y, position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 24px', pointerEvents: 'none' }}>
-        <h2 style={{ fontSize: 'clamp(28px, 4.5vw, 56px)', fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.03em', maxWidth: '780px', fontFamily: "'Space Grotesk', sans-serif", color: textPrimary }}>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            style={{ fontSize: 'clamp(15px, 2vw, 20px)', color: textSecondary, maxWidth: '620px', margin: '0 auto 36px', lineHeight: 1.65 }}
+          >
+            The empathetic clinical companion combining real-time behavioral insights, smart challenges, and multimodal AI medical guidance.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 32 }}
+          >
+            <button
+              onClick={onGuestLogin}
+              style={{
+                padding: '14px 28px', borderRadius: 14, border: 'none',
+                background: 'linear-gradient(135deg, #3b82f6, #10b981)', color: '#fff',
+                fontSize: 15, fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+                boxShadow: '0 8px 25px -4px rgba(59,130,246,0.45)'
+              }}
+            >
+              <Sparkles size={18} /> Launch Instant Demo
+            </button>
+            <button
+              onClick={scrollToAuth}
+              style={{
+                padding: '14px 26px', borderRadius: 14, border: `1px solid ${cardBorder}`,
+                background: isDarkMode ? 'rgba(255,255,255,0.04)' : '#ffffff',
+                color: textPrimary, fontSize: 15, fontWeight: 700, cursor: 'pointer',
+                boxShadow: isDarkMode ? 'none' : '0 2px 8px rgba(0,0,0,0.05)'
+              }}
+            >
+              Sign In or Register
+            </button>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', color: textMuted, fontSize: 12, fontWeight: 700 }}
+          >
+            <span>✓ Gemini 3.5 AI Powered</span>
+            <span>✓ Clinical Triage Engine</span>
+            <span>✓ HIPAA-Aligned Security</span>
+            <span>✓ Zero WebGL Latency</span>
+          </motion.div>
+        </div>
+
+        <div style={{ marginTop: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, color: textMuted }}>
+          <span style={{ fontSize: '11px', letterSpacing: '0.22em', textTransform: 'uppercase', fontWeight: 800 }}>Explore Platform Features</span>
+          <ChevronDown size={18} />
+        </div>
+      </section>
+
+      {/* ── SECTION 2: VALUES & CAPABILITIES (Clean Grid Flow) ── */}
+      <section style={{ padding: '60px 24px', maxWidth: '1080px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+        <h2 style={{ fontSize: 'clamp(28px, 4.5vw, 52px)', fontWeight: 900, lineHeight: 1.2, letterSpacing: '-0.03em', maxWidth: '780px', margin: '0 auto', fontFamily: "'Space Grotesk', sans-serif", color: textPrimary }}>
           Every heartbeat tells a story.<br />We help you <span className="text-gradient-warm">understand it.</span>
         </h2>
-        <p style={{ fontSize: '16px', color: textSecondary, maxWidth: '540px', margin: '18px auto 32px', lineHeight: 1.65 }}>
+        <p style={{ fontSize: '16px', color: textSecondary, maxWidth: '560px', margin: '18px auto 40px', lineHeight: 1.65 }}>
           From daily hydration habits to clinical symptom assessment, HealthCatch keeps you empowered without medical overwhelm.
         </p>
 
-        {/* 3 Pillar Preview Cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16, width: '100%', maxWidth: '860px', pointerEvents: 'auto' }}>
+        {/* 3 Pillar Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
           {[
-            { icon: <Activity size={22} color="#3b82f6" />, title: 'Real-Time Vitals', desc: 'Continuous tracking of hydration, steps, mood, and sleep cycles.' },
-            { icon: <CircleGauge size={22} color="#10b981" />, title: 'Digital Health Passport', desc: 'Secure, portable medical identity card with emergency responder QR.' },
-            { icon: <Sparkle size={22} color="#a855f7" />, title: 'Multimodal AI Triage', desc: 'Clinical guidance, prescription review, and 4-7-8 nervous system pacing.' },
+            { icon: <Activity size={24} color="#3b82f6" />, title: 'Real-Time Vitals', desc: 'Continuous tracking of hydration, steps, mood check-ins, and sleep cycles.' },
+            { icon: <CircleGauge size={24} color="#10b981" />, title: 'Digital Health Passport', desc: 'Secure, portable biometric ID card with emergency responder QR code.' },
+            { icon: <Sparkle size={24} color="#a855f7" />, title: 'Multimodal AI Triage', desc: 'Clinical guidance, prescription image review, and 4-7-8 breathing pacer.' },
           ].map((c, i) => (
-            <GlassCard key={i} style={{ padding: '22px', textAlign: 'left' }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, background: isDarkMode ? 'rgba(255,255,255,0.05)' : 'rgba(15,23,42,0.05)', display: 'grid', placeItems: 'center', marginBottom: 14 }}>
+            <GlassCard key={i} style={{ padding: '28px', textAlign: 'left' }}>
+              <div style={{ width: 48, height: 48, borderRadius: 14, background: isDarkMode ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.05)', display: 'grid', placeItems: 'center', marginBottom: 16 }}>
                 {c.icon}
               </div>
-              <h4 style={{ fontSize: 16, fontWeight: 800, marginBottom: 6, color: textPrimary }}>{c.title}</h4>
-              <p style={{ fontSize: 13, color: textSecondary, lineHeight: 1.55 }}>{c.desc}</p>
+              <h4 style={{ fontSize: 18, fontWeight: 800, marginBottom: 8, color: textPrimary }}>{c.title}</h4>
+              <p style={{ fontSize: 13.5, color: textSecondary, lineHeight: 1.6 }}>{c.desc}</p>
             </GlassCard>
           ))}
         </div>
-      </motion.div>
+      </section>
 
-      {/* SECTION 3: INTELLIGENCE */}
-      <motion.div style={{ opacity: s3Opacity, y: s3Y, position: 'fixed', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 24px', pointerEvents: 'none' }}>
-        <h2 style={{ fontSize: 'clamp(26px, 4vw, 54px)', fontWeight: 900, letterSpacing: '-0.03em', marginBottom: '20px', fontFamily: "'Space Grotesk', sans-serif", color: textPrimary }}>
+      {/* ── SECTION 3: CLINICAL INTELLIGENCE ── */}
+      <section style={{ padding: '60px 24px', maxWidth: '1080px', margin: '0 auto', width: '100%', textAlign: 'center' }}>
+        <h2 style={{ fontSize: 'clamp(26px, 4vw, 50px)', fontWeight: 900, letterSpacing: '-0.03em', marginBottom: '18px', fontFamily: "'Space Grotesk', sans-serif", color: textPrimary }}>
           Powered by <span className="text-gradient-cool">clinical intelligence.</span>
         </h2>
-        <p style={{ fontSize: '16px', color: textSecondary, maxWidth: '560px', margin: '0 auto 28px', lineHeight: 1.65 }}>
+        <p style={{ fontSize: '16px', color: textSecondary, maxWidth: '580px', margin: '0 auto 36px', lineHeight: 1.65 }}>
           Multimodal vision models analyze lab reports and prescriptions, while behavioral coaches pace your daily goals with evidence-based habits.
         </p>
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
-          {['Gemini 3.5 Flash Powered', 'Validated Emergency Red-Flags', 'HIPAA-Aligned Privacy', 'Offline Clinical Fallback'].map((tag) => (
-            <span key={tag} style={{ padding: '6px 16px', borderRadius: 99, background: isDarkMode ? 'rgba(59,130,246,0.12)' : 'rgba(59,130,246,0.1)', color: '#3b82f6', border: '1px solid rgba(59,130,246,0.25)', fontSize: 12, fontWeight: 800 }}>
-              ✓ {tag}
-            </span>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 16 }}>
+          {[
+            { title: 'Sub-Second AI Response', desc: 'Powered by Gemini 3.5 Flash running with high-speed medical context.' },
+            { title: 'Emergency Red-Flag Detection', desc: 'Instantly identifies acute symptoms (chest pain, stroke) and surfaces emergency hotlines.' },
+            { title: 'Evidence-Based Habit Loops', desc: '4-7-8 parasympathetic breathing pacers and circadian morning sunlight anchors.' },
+            { title: 'Zero-Knowledge Document Vault', desc: 'Local and encrypted cloud storage for your blood panels and prescriptions.' },
+          ].map((item, idx) => (
+            <GlassCard key={idx} style={{ padding: '22px', textAlign: 'left' }}>
+              <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#3b82f6', marginBottom: 12 }} />
+              <h4 style={{ fontSize: 15, fontWeight: 800, marginBottom: 6, color: textPrimary }}>{item.title}</h4>
+              <p style={{ fontSize: 12.5, color: textSecondary, lineHeight: 1.55 }}>{item.desc}</p>
+            </GlassCard>
           ))}
         </div>
-      </motion.div>
+      </section>
 
-      {/* SECTION 4: AUTH CARD */}
-      <motion.div style={{ opacity: s4Opacity, y: s4Y, position: 'fixed', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px', pointerEvents: 'auto' }}>
+      {/* ── SECTION 4: AUTH & ONBOARDING CARD ── */}
+      <section id="auth-section" style={{ padding: '60px 24px 100px', display: 'flex', justifyContent: 'center' }}>
         <div style={{
           width: '100%', maxWidth: '440px', background: cardBg,
           backdropFilter: 'blur(40px) saturate(180%)',
@@ -758,10 +828,20 @@ function CinematicLanding({ onLogin, onGuestLogin, scrollProgressRef, isDarkMode
             </button>
           </p>
         </div>
-      </motion.div>
+      </section>
+
+      {/* ── FOOTER ── */}
+      <footer style={{
+        padding: '24px', borderTop: `1px solid ${cardBorder}`, textAlign: 'center',
+        color: textMuted, fontSize: 12, lineHeight: 1.6
+      }}>
+        <p>© 2026 HealthCatch AI. Built with clinical intelligence and patient-first privacy.</p>
+        <p style={{ marginTop: 4 }}>Notice: HealthCatch AI is an educational wellness and diagnostic triage tool. In case of acute medical emergencies, dial 112 / 911 immediately.</p>
+      </footer>
     </div>
   );
 }
+
 // ── MODALS & SUB-COMPONENTS ─────────────────────────────────────────────
 
 function AppointmentBookingModal({ doctor, onClose, onConfirm, isDarkMode }) {
